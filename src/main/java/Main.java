@@ -1,16 +1,18 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Main {
     static int[][] matrixA = {
-            {123, 211, 399},
-            {223, 311, 499},
-            {323, 411, 599},
+            {1, 2, 3},
+            {4, 5, 6},
+            {7, 8, 9},
     };
 
     static int[][] matrixB = {
-            {155, 266, 377},
-            {255, 366, 477},
-            {355, 466, 577},
+            {9, 8, 7},
+            {6, 5, 4},
+            {3, 2, 1},
     };
 
 
@@ -31,19 +33,23 @@ public class Main {
     static int lenX = 3, lenY = 3;
 
     static int[][] matrixC = new int[lenX][lenY];
+    static List<ThreadFirst> listThread = new ArrayList<ThreadFirst>();
 
     public static void main(String[] args) {
 
-        ThreadFirst thread1 = new ThreadFirst();
-        thread1.start();
-        ThreadSecond thread2 = new ThreadSecond();
-        thread2.start();
+        for (int x = 0; matrixA.length > x; x++) {
+            for (int y = 0; matrixA[0].length > y; y++) {
+                ThreadFirst thread1 = new ThreadFirst(x, y);
+                thread1.start();
 
-        try {
-            thread1.join();
-            thread2.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+                try {
+                    thread1.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                listThread.add(thread1);
+            }
         }
 
         for (int i = 0; lenX > i; i++) {
@@ -55,26 +61,20 @@ public class Main {
     }
 
     public static class ThreadFirst extends Thread {
-        public void run() {
-            for (int i = 0; lenX / 2 > i; i++) {
-                for (int j = 0; lenY > j; j++) {
-                    for (int x = 0; lenY > x; x++) {
-                        matrixC[i][j] += matrixA[i][x] * matrixB[x][j];
-                    }
-                }
-            }
-        }
-    }
+        int x, y;
 
-    public static class ThreadSecond extends Thread {
+        public ThreadFirst(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
         public void run() {
-            for (int i = lenX / 2; lenX > i; i++) {
-                for (int j = 0; lenY > j; j++) {
-                    for (int x = 0; lenY > x; x++) {
-                        matrixC[i][j] += matrixA[i][x] * matrixB[x][j];
-                    }
-                }
-            }
+            matrixC[x][y] += matrixA[x][y] * matrixB[x][y] +
+                    matrixA[x][y + 1] * matrixB[x + 1][y] +
+                    matrixA[x][y + 2] * matrixB[x + 2][y];
+            System.out.println(matrixA[x][y] + " " + matrixB[x][y] + " " +
+                    matrixA[x][y + 1] + " " + matrixB[x + 1][y] + " " +
+                    matrixA[x][y + 2] + " " + matrixB[x + 2][y]);
         }
     }
 }
